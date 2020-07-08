@@ -1,11 +1,66 @@
+class Node:
+    def __init__(self, key=None, value=None):
+        self.key = key
+        self.value = value
+        self.next = None
+
 class HashTableEntry:
     """
     Linked List hash table key/value pair
     """
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-        self.next = None
+    def __init__(self, key=None, value=None):
+        if value is None:
+            self.head = None
+        else: 
+            self.head = Node(key, value)
+
+        def add_to_head(self, key, value):
+            if self.head is None:
+            self.head = Node(key, value)
+        else:
+            node = Node(key,value)
+            node.next = self.head
+            self.head = node
+        return self.head
+
+    def find_by_value(self, value):
+        current = self.head
+        while current is not None:
+            if current.value == value:
+                return current
+            current = current.next
+        return None
+
+    def find_by_key(self, key):
+        current = self.head
+        while current is not None:
+            if current.key == key:
+                return current.value
+            current = current.next
+        return None
+
+    def insert(self, key, value):
+        current = self.head
+        while current is not None:
+            if current.key == key:
+                current.value = value
+                return current
+            current = current.next
+        self.add_to_head(key, value)
+
+    def delete(self, key):
+        current = self.head
+        if current.key == key:
+            value = current.value
+            self.head = current.next
+            return value
+        while current.next is not None:
+            if current.next.key == key:
+                value = current.next.value
+                current.next = current.next.next
+                return value
+            current = current.next
+        return None
 
 
 # Hash table can't have fewer than this many slots
@@ -22,7 +77,11 @@ class HashTable:
 
     def __init__(self, capacity):
         # Your code here
-
+        self.capacity = capacity
+        self.storage = []
+        self.load = 0
+        for _ in range(capacity):
+            self.storage.append(HashTableEntry(None, None))
 
     def get_num_slots(self):
         """
@@ -35,6 +94,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return self.capacity
 
 
     def get_load_factor(self):
@@ -44,6 +104,8 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        loadFactor = self.load / self.capacity
+        return loadFactor
 
 
     def fnv1(self, key):
@@ -63,6 +125,11 @@ class HashTable:
         Implement this, and/or FNV-1.
         """
         # Your code here
+        hash = 5381
+        for c in key:
+            hash = (hash * 33) + ord(c)
+        return hash   
+
 
 
     def hash_index(self, key):
@@ -82,6 +149,13 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.load += 1
+        entry = HashTableEntry(key, value)
+        # creates index
+        index = self.hash_index(key)
+        # inserts entry into index point
+        self.storage[index].insert(key, value)
+
 
 
     def delete(self, key):
@@ -93,6 +167,9 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.load -= 1
+        index = self.hash_index(key)
+        return self.storage[index].delete(key)
 
 
     def get(self, key):
@@ -104,6 +181,8 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        return self.storage[index].find_by_key(key)
 
 
     def resize(self, new_capacity):
